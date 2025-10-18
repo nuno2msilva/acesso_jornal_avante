@@ -1,47 +1,25 @@
-# Jornal Avante - Edição Atual
+# Portal Jornal Avante 🚩
 
-## Descrição
-
-Este script HTML permite aceder automaticamente à edição mais recente do Jornal Avante em formato PDF. O script calcula a edição atual com base na quinta-feira mais recente e redireciona automaticamente para o PDF correspondente.
+Acesso rápido e automático ao Jornal Avante em PDF.
 
 ## Como Funciona
 
-O script:
-1. Calcula a quinta-feira mais recente (dia de publicação do jornal)
-2. Determina o número da edição atual com base na edição inicial de referência (nº 2534, de 23/06/2022)
-3. Constrói o URL do PDF correspondente
-4. Verifica se o PDF existe no servidor
-5. Redireciona automaticamente para o PDF após 2 segundos (se existir)
+1. **Calcula** a edição atual baseada na quinta-feira mais recente
+2. **Verifica** se o PDF está disponível online
+3. **Redireciona** automaticamente após 2 segundos
+4. **Fallback** para edição anterior se necessário
 
-## Utilização
+## Usar
 
-1. Abre o ficheiro `avante_edicao_atual.html` num navegador web
-2. Aguarda 2 segundos para o redirecionamento automático
-3. Se não funcionar automaticamente, clica no link de fallback fornecido
+Abre `index.html` no teu navegador. Simples! 
+Ou usa o link do repositório: https://nuno2msilva.github.io/acesso_jornal_avante/
 
-## Configuração
+## Tecnologia
 
-As constantes principais estão definidas no início do script JavaScript:
+- HTML + JavaScript puro (sem dependências)
+- Proxy público para verificação CORS
+- Cálculo automático de edições (desde 23/06/2022, edição nº 2534)
 
-- **EDICAO_INICIAL**: `2534` (número da edição de referência)
-- **DATA_INICIAL**: `23/06/2022` (quinta-feira de publicação da edição inicial)
-- **QUINTA_FEIRA**: `4` (dia da semana em que o jornal é publicado)
+---
 
-## Tratamento de Erros
-
-O script trata diferentes cenários:
-
-- **✅ PDF encontrado (200)**: Redireciona automaticamente
-- **❌ PDF não encontrado (404)**: Apresenta mensagem de erro
-- **⚠️ Outros erros (403, 500, etc.)**: Apresenta status HTTP e mensagem de aviso
-- **⚠️ Erro de rede/CORS**: Tenta abrir o PDF na mesma
-
-## Notas
-
-- O script considera que o jornal é publicado às quintas-feiras
-- A verificação da hora do dia é feita às 8:00 da manhã
-- Os PDFs são obtidos de `https://www.avante.pt/public/pdf/`
-
-## Contacto
-
-Em caso de problemas ou erros no cálculo da edição, contacta o programador.
+**Nota**: Jornal publicado todas as quintas-feiras.
