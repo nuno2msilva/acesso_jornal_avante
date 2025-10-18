@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Jornal Avante</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+            margin-top: 20%;
+        }
+    </style>
+</head>
+<body>
+    <p id="message">A abrir / descarregar edição nº <span id="edition">...</span> do Jornal Avante.</p>
+    <p><a id="fallback" href="#">Clica aqui se não funcionou!</a></p>
+
+    <script>
+        // Configuração: Edição nº 2534 saiu a 23/06/2022 (quinta-feira)
+        // Última edição disponível é a 2533, em 18/11/2024
+        // Mas como a EDIIÇÃO nº 2533 saiu QUARTA-FEIRA (15/06/2022), dei partida da 2534
+        const EDICAO_INICIAL = 2534;
+        const DATA_INICIAL = new Date('2022-06-23');
+        const QUINTA_FEIRA = 4; // Determinar QUINTA-FEIRA (0 = DOMINGO, ..., 4 = QUINTA, ...)
+        
+        // Obter data de HOJE, a considerar às 8 da manhã
+        const hoje = new Date();
+        hoje.setHours(8, 0, 0, 0);
+        
+        // Calcular QUINTA-FEIRA mais recente
+        const diaDaSemana = hoje.getDay();
+        const diasAteQuinta = (diaDaSemana + 7 - QUINTA_FEIRA) % 7;
+        const quintaFeiraRecente = new Date(hoje.getTime() - diasAteQuinta * 86400000);
+        
+        // Calcular número de semanas desde a edição inicial
+        const milissegundosPorSemana = 7 * 24 * 60 * 60 * 1000;
+        const semanasDecorridas = Math.floor((quintaFeiraRecente - DATA_INICIAL) / milissegundosPorSemana);
+        
+        // Calcular EDIÇÃO atual e construir URL
+        const edicaoAtual = EDICAO_INICIAL + semanasDecorridas;
+        const urlPDF = `https://www.avante.pt/public/pdf/${edicaoAtual}_avante.pdf`;
+        
+        // Atualizar informação na página
+        document.getElementById('edition').textContent = edicaoAtual;
+        document.getElementById('fallback').href = urlPDF;
+
+        // Verificar se PDF existe e está disponível para redirecionar
+        (async () => {
+            try {
+                const resposta = await fetch(urlPDF, { method: 'HEAD' });
+                
+                if (resposta.ok) {
+                    // PDF existe (200) e redirecionar após 2 segundos
+                    setTimeout(() => window.location.href = urlPDF, 2000);
+                    
+                } else if (resposta.status === 404) {
+                    // PDF não encontrado (404) - Possível erro na lógica entre EDIÇÃO e DATA causado pela Avante
+                    document.getElementById('message').innerHTML = 
+                        `❌ Erro ao carregar a edição nº ${edicaoAtual}.<br>Contacta o programador deste script.`;
+                    document.getElementById('fallback').style.display = 'none';
+                    
+                } else {
+                    // Outro erro inesperado (403, 500, etc.) - Não fazer nada
+                    document.getElementById('message').innerHTML = 
+                        `⚠️ Erro inesperado ao verificar a edição nº ${edicaoAtual}.<br>Status HTTP: ${resposta.status}.<br>Contacta o programador deste script.`;
+                    document.getElementById('fallback').style.display = 'none';
+                }
+                
+            } catch (erro) {
+                // Erro de rede ou CORS - O servidor pode estar a bloquear HEAD requests
+                // Tenta abrir o PDF na mesma (pode ser apenas CORS a bloquear a verificação)
+                console.error('Erro ao verificar PDF (pode ser CORS):', erro);
+                console.log('A tentar abrir o PDF na mesma...');
+                
+                document.getElementById('message').innerHTML = 
+                    `⚠️ Não foi possível verificar automaticamente a edição nº ${edicaoAtual}.<br>A tentar abrir na mesma...`;
+                
+                setTimeout(() => window.location.href = urlPDF, 2000);
+            }
+        })();
+    </script>
+</body>
+</html>
