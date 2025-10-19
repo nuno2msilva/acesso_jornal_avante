@@ -1,4 +1,4 @@
-# Acesso Rápido - Jornal Avante
+# Acesso Rápido - Jornal Avante 🚩
 
 Portal web minimalista intermediário para acesso rápido à edição atual do Jornal Avante em formato PDF.
 
