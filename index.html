@@ -2,201 +2,32 @@
 <html lang="pt">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Portal Jornal Avante</title>
-    <style>
-        html,body {
-            height: 100%
-        }
-
-        body {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0;
-            font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial
-        }
-
-        .card {
-            max-width: 720px;
-            padding: 28px;
-            border-radius: 10px;
-            text-align: center
-        }
-
-        h1 {
-            font-size: 1.6rem;
-            margin: 0 0 .5rem
-        }
-
-        p {
-            margin: .4rem 0;
-            font-size: 1rem
-        }
-
-        #status {
-            font-size: 1.05rem;
-            margin-top: 10px
-        }
-
-        button {
-            margin-top: 14px;
-            padding: .6rem 1rem;
-            border: 0;
-            border-radius: 8px;
-            background: #0b5fff;
-            color: white;
-            cursor: pointer
-        }
-
-        a.inline {
-            color: #0b5fff
-        }
-
-        pre {
-            background: #f6f8fa;
-            padding: 8px;
-            border-radius: 6px;
-            overflow: auto
-        }
-    </style>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Acesso Rápido - Jornal Avante</title>
+	<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-    <div class="card">
-        <h1>Portal "Jornal Avante" Online</h1><br><br>
-        <img src="https://www.avante.pt/arquivo/imagens/avante.gif"><br><br>
-        <p>Bem vindu, camarada(s)!</p>
-        <p id="lead">De acordo com os meus cálculos, a edição nº <strong id="edition">...</strong> é a mais recente...</p>
-        <p>Esta edição é prevista ser do dia <strong id="date">...</strong>...</p><br>
 
-        <div id="status">🔄 A preparar a verificação... 🔄</div>
+	<div class="card">
+		<h1>Acesso Rápido - Jornal Avante</h1><br><br>
+		<img src="https://www.avante.pt/arquivo/imagens/avante.gif"><br><br>
+		<p>Bem vindu(s), camarada(s)!</p>
 
-        <div id="actions" style="margin-top:12px">
-            <button id="openPdf" style="display:none">Abrir PDF</button>
-        </div>
+		<div id="conteudoPrincipal">
+			<p>A edição atual é a nº <strong><span id="numeroEdicao">...</span></strong>, do dia <strong><span id="dataEdicao">...</span></strong>!</p>
+			<h2><p id="textoRedirecionar">Vamos levar-te á página da edição atual!</p></h2>
+		</div>
 
-        <div id="manual" style="margin-top:14px;color:#444;font-size:.95rem"></div>
+		<button id="openPdf" style="display:none">Abrir PDF</button>
 
-        <div style="margin-top:20px;font-size:.8rem;color:#666">
-            <p><strong>Nota:</strong> Existem browsers (como em dispositivos móveis) que não abrem PDFs diretamente.<br>
-            Nesse caso, verifica as transferências para verificar se descarregou o jornal em formato PDF!</p>
-        </div>
-    </div>
-
-    <script>
-        // Configuração: Edição nº 2534 saiu a 23/06/2022 (quinta-feira)
-        // A edição disponível online mais antiga é a 2533 (verificado a 18/11/2024)
-        // Mas como a EDIÇÃO nº 2533 saiu QUARTA-FEIRA (15/06/2022), iniciei o contador na 2534
-        const NUMERO_EDICAO_INICIAL = 2534;
-        const DATA_PUBLICACAO_INICIAL = new Date('2022-06-23T08:00:00'); // Data da edição nº 2534
-        const DIA_SEMANA_PUBLICACAO = 4; // Index começa no 0, logo se é DOMINGO = 0, ..., QUINTA = 4
-
-        // Calcular a edição atual (considerando QUINTA às 08:00 da manhã)
-        const dataAtual = new Date(); 
-        dataAtual.setHours(8, 0, 0, 0);
-        const diaDaSemanaAtual = dataAtual.getDay();
-        const diasAteProximaQuinta = (diaDaSemanaAtual + 7 - DIA_SEMANA_PUBLICACAO) % 7;
-        const dataQuintaFeiraMaisRecente = new Date(dataAtual.getTime() - diasAteProximaQuinta * 24 * 60 * 60 * 1000);
-        const numeroDeSemanasDesdeInicio = Math.floor((dataQuintaFeiraMaisRecente - DATA_PUBLICACAO_INICIAL) / (7 * 24 * 60 * 60 * 1000));
-        const numeroEdicaoAtual = NUMERO_EDICAO_INICIAL + numeroDeSemanasDesdeInicio;
-
-        // Função auxiliar: calcula a data de uma edição específica
-        const obterDataDaEdicao = (numeroEdicao) => {
-            const semanasDesdeEdicaoInicial = numeroEdicao - NUMERO_EDICAO_INICIAL;
-            const milissegundosPorSemana = 7 * 24 * 60 * 60 * 1000;
-            return new Date(DATA_PUBLICACAO_INICIAL.getTime() + (semanasDesdeEdicaoInicial * milissegundosPorSemana));
-        };
-
-        // Função auxiliar: formata data em português (ex: "16 de Outubro de 2025")
-        const formatarDataEmPortugues = (data) => {
-            try {
-                const dataFormatada = new Intl.DateTimeFormat('pt-PT', { day: 'numeric', month: 'long', year: 'numeric' }).format(data);
-                return dataFormatada.replace(/ de ([a-zçãõéíóú]+) de /i, (correspondencia, mes) => ' de ' + mes.charAt(0).toUpperCase() + mes.slice(1) + ' de ');
-            } catch (erro) {
-                return data.toLocaleDateString();
-            }
-        };
-
-        // Exibir edição e data correspondente
-        const elementoData = document.getElementById('date');
-        const dataPublicacaoEdicaoAtual = obterDataDaEdicao(numeroEdicaoAtual);
-        if (elementoData) elementoData.textContent = formatarDataEmPortugues(dataPublicacaoEdicaoAtual);
-
-        const urlPdfEdicaoAtual = `https://www.avante.pt/public/pdf/${numeroEdicaoAtual}_avante.pdf`;
-
-        // Elementos da interface
-        const elementoNumeroEdicao = document.getElementById('edition');
-        const elementoEstado = document.getElementById('status');
-        const botaoAbrirPdf = document.getElementById('openPdf');
-        const elementoInstrucoesManual = document.getElementById('manual');
-
-        elementoNumeroEdicao.textContent = numeroEdicaoAtual;
-
-        // Função auxiliar: fetch com timeout
-        const buscarComTimeout = (url, opcoes = {}, milissegundosTimeout = 5000) => {
-            const controladorAbortagem = new AbortController();
-            const idTimeout = setTimeout(() => controladorAbortagem.abort(), milissegundosTimeout);
-            return fetch(url, { ...opcoes, signal: controladorAbortagem.signal }).finally(() => clearTimeout(idTimeout));
-        };
-
-        // Verifica disponibilidade do PDF através de proxy público
-        const verificarDisponibilidade = async (urlParaVerificar) => {
-            try {
-                const urlProxyPublico = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(urlParaVerificar);
-                const respostaProxy = await buscarComTimeout(urlProxyPublico, {}, 8000);
-                return respostaProxy && typeof respostaProxy.status === 'number' ? respostaProxy.status : null;
-            } catch (erro) {
-                console.debug('Verificação falhou:', erro);
-                return null;
-            }
-        };
-
-        // Fluxo simplificado: 200-> Redirecionar, 404->tentar edição anterior, other-> Mensagem
-        (async () => {
-            elementoEstado.textContent = '🔎 A verificar disponibilidade...';
-            const codigoEstadoHttp = await verificarDisponibilidade(urlPdfEdicaoAtual);
-            
-            if (codigoEstadoHttp === 200) {
-                // Sucesso: redirecionar após 2s
-                elementoEstado.textContent = '✅ A edição foi encontrada! A abrir o Jornal Avante...';
-                botaoAbrirPdf.style.display = 'inline-block';
-                setTimeout(() => window.location.href = urlPdfEdicaoAtual, 2000);
-                return;
-            }
-            
-            if (codigoEstadoHttp === 404) {
-                // Edição não encontrada: tentar edição anterior
-                const numeroEdicaoAnterior = numeroEdicaoAtual - 1;
-                const dataPublicacaoEdicaoAnterior = obterDataDaEdicao(numeroEdicaoAnterior);
-                elementoEstado.textContent = '⚠️ Edição atual ainda não parece estar disponível! A tentar edição anterior...';
-                const urlPdfEdicaoAnterior = `https://www.avante.pt/public/pdf/${numeroEdicaoAnterior}_avante.pdf`;
-                const codigoEstadoEdicaoAnterior = await verificarDisponibilidade(urlPdfEdicaoAnterior);
-                
-                if (codigoEstadoEdicaoAnterior === 200) {
-                    elementoEstado.textContent = `✅ Edição ${numeroEdicaoAnterior} (${formatarDataEmPortugues(dataPublicacaoEdicaoAnterior)}) disponível! A abrir...`;
-                    botaoAbrirPdf.style.display = 'inline-block';
-                    botaoAbrirPdf.textContent = `Abrir Edição ${numeroEdicaoAnterior}`;
-                    setTimeout(() => window.location.href = urlPdfEdicaoAnterior, 2000);
-                } else {
-                    elementoEstado.textContent = '❌ Algo correu mal...';
-                    elementoInstrucoesManual.innerHTML = '<p>Por favor, tenta novamente mais tarde.</p>';
-                    botaoAbrirPdf.style.display = 'inline-block';
-                    botaoAbrirPdf.textContent = 'Tentar Novamente';
-                    botaoAbrirPdf.onclick = () => location.reload();
-                }
-                return;
-            }
-            
-            // Outros erros: mensagem amigável
-            elementoEstado.textContent = '⚠️ Não foi possível verificar a disponibilidade.';
-            elementoInstrucoesManual.innerHTML = '<p>Por favor, tenta abrir manualmente ou volta mais tarde.</p>';
-            botaoAbrirPdf.style.display = 'inline-block';
-            botaoAbrirPdf.textContent = 'Tentar Abrir';
-            botaoAbrirPdf.onclick = () => window.open(urlPdfEdicaoAtual, '_blank');
-        })();
-    </script>
+		<div style="margin-top:20px;font-size:.8rem;color:#666">
+			<p><strong>Nota:</strong> Existem browsers (como em dispositivos móveis) que não abrem PDFs no browser.<br>
+				Nesse caso, verifica as transferências para verificar se descarregou o jornal Avante em 	formato PDF!</p>
+		</div>
+	</div>
+	<script src="script.js"></script>
 </body>
 
 </html>
